@@ -10,11 +10,19 @@ import java.util.List;
 //对前端的请求做反应，前端访问这个链接，Controller对用Service的服务进行操作，最后返回给前端
 //controller 接收请求 → service 负责“处理事情” → repository 负责“查数据库”
 @RestController
-@RequestMapping
+@RequestMapping("/api/projects")
 public class ProjectController {
 
+    /* 不建议使用字段注入，JUnit 或 Mock 框架不好手动注入依赖， 不利于测试
     @Autowired
     private ProjectService projectService;
+     */
+
+    private final ProjectService projectService;
+
+    public ProjectController(ProjectService projectService) {
+        this.projectService = projectService;
+    }
 
     @GetMapping
     public List<Project> findAll() {
