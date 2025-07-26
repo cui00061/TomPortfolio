@@ -1,15 +1,23 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:mysql://localhost:3306/tomportfolio_db?useSSL=false&serverTimezone=UTC
+    username: root
+    password: yA046861....  # ← 替换成你自己的 MySQL root 密码
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: update  # 每次启动时更新表结构（开发阶段推荐）
+    show-sql: true      # 控制台打印 SQL 语句（方便调试）
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect  # 使用 MySQL 8 方言
 
-  h2:
-    console:
-      enabled: true
+  # 可选配置：设置字符集编码（建议写）
+  sql:
+    init:
+      encoding: UTF-8
+
+# 服务器端口（可选，默认是 8080）
+# server:
+#   port: 8080

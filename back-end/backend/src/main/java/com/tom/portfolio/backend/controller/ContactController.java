@@ -17,17 +17,17 @@ public class ContactController {
     }
 
     //接收访客留言（公开）
-    @PostMapping("/api/contact")
+    @PostMapping("")
     public Contact save(@RequestBody Contact c) {
         return contactService.saveContact(c);
     }
 
-    @GetMapping("/api/admin/contact")
+    @GetMapping("/admin/contact")
     public List<Contact> getAll() {
         return contactService.getAllContacts();
     }
 
-    @DeleteMapping("/api/admin/contact/{id}")
+    @DeleteMapping("/admin/contact/{id}")
     public void delete(@PathVariable Long id) {
         contactService.deleteContactById(id);
     }
