@@ -29,4 +29,12 @@ public class AboutService {
         newAbout.setId(1L); // 固定 id 为 1
         return aboutRepository.save(newAbout);
     }
+
+    /*用于添加唯一一条内容
+    public About createAbout(About about) {
+        return aboutRepository.save(about);
+    }
+
+     */
+
 }
