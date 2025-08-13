@@ -3,10 +3,11 @@
 </script>
 
 <template>
-  <div>
-    <h1>My Portfolio</h1>
-    <Navbar/>
-    <router-view/>
+  <div class="min-h-screen text-nature-brown font-sans bg-transparent">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+      <Navbar />
+      <router-view />
+    </div>
   </div>
 </template>
 

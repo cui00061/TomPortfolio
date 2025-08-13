@@ -1,37 +1,39 @@
-<!-- src/components/Navbar-->
- <template>
-    <nav class = "navbar">
-        <ul>
-            <li><RouterLink to="/">Home</RouterLink></li>
-            <li><RouterLink to="/about">About</RouterLink></li>
-            <li><RouterLink to="/contact">Contact</RouterLink></li>
-            <li><RouterLink to="/projects">Projects</RouterLink></li>
-        </ul>
-    </nav>
- </template>
+<template>
+  <nav class="flex items-center justify-between bg-white/60 backdrop-blur-md rounded-2xl
+                 px-6 py-4 shadow-lg sticky top-4 mx-4 z-50">
+    <div class="text-xl font-semibold text-nature-brown">
+      Tom’s Portfolio
+    </div>
+    <ul class="flex space-x-6">
+      <li v-for="link in links" :key="link.to" class="group">
+        <RouterLink
+          :to="link.to"
+          v-slot="{ href, navigate, isActive }"
+        >
+          <a
+            :href="href"
+            @click="navigate"
+            class="inline-block transition-all duration-250
+                   transform group-hover:-translate-y-1"
+            :class="isActive
+              ? 'font-extrabold text-nature-green'
+              : 'font-medium text-nature-brown/80 group-hover:text-nature-green'
+            "
 
-<!--For script use-->
- <script setup>
+          >
+            {{ link.name }}
+          </a>
+        </RouterLink>
+      </li>
+    </ul>
+  </nav>
+</template>
 
+<script setup>
+const links = [
+  { name: 'Home',    to: '/'       },
+  { name: 'About',   to: '/about'  },
+  { name: 'Contact', to: '/contact'},
+  { name: 'Projects',to: '/projects'},
+]
 </script>
-
-
-<style scoped>
-.navbar {
-  background-color: #f5f5f5;
-  padding: 10px;
-}
-.navbar ul {
-  display: flex;
-  list-style: none;
-  gap: 20px;
-}
-.navbar a {
-  text-decoration: none;
-  color: #333;
-}
-.navbar a.router-link-active {
-  font-weight: bold;
-  color: #007BFF;
-}
-</style>
