@@ -30,11 +30,11 @@ public class AboutService {
         return aboutRepository.save(newAbout);
     }
 
-    /*用于添加唯一一条内容
+    /*用于添加唯一一条内容*/
     public About createAbout(About about) {
         return aboutRepository.save(about);
     }
 
-     */
+
 
 }

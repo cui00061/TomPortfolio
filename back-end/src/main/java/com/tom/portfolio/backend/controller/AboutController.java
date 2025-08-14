@@ -30,11 +30,11 @@ public class AboutController {
         return aboutService.updateAbout(newAbout);
     }
 
-    /* 用于添加唯一一条内容
+    /* 用于添加唯一一条内容*/
     @PostMapping
     public About createAbout(@RequestBody About newAbout) {
         return aboutService.createAbout(newAbout);
     }
-     */
+
 
 }

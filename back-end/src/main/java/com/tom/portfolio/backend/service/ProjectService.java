@@ -2,20 +2,14 @@ package com.tom.portfolio.backend.service;
 
 import com.tom.portfolio.backend.model.Project;
 import com.tom.portfolio.backend.repository.ProjectRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.ArrayList; // ★ NEW
 
-//用作接收controller的请求并通过Repository进行操作，最后返回给controller
-//controller 接收请求 → service 负责“处理事情” → repository 负责“查数据库”
+// controller 接收请求 → service 负责“处理事情” → repository 负责“查数据库”
 @Service
 public class ProjectService {
-
-    /*
-    @Autowired
-    private ProjectRepository projectRepository;
-     */
 
     private final ProjectRepository projectRepository;
 
@@ -33,6 +27,10 @@ public class ProjectService {
     }
 
     public Project saveProject(Project project) {
+        // ★ NEW: 如果前端没传 screenshots，给个空列表，避免持久化时 NPE
+        if (project.getScreenshotUrls() == null) {
+            project.setScreenshotUrls(new ArrayList<>());
+        }
         return projectRepository.save(project);
     }
 
@@ -41,7 +39,10 @@ public class ProjectService {
                 .orElseThrow(() -> new RuntimeException("Project not found"));
         existing.setTitle(newProject.getTitle());
         existing.setDescription(newProject.getDescription());
-        // 可添加更多字段
+        // ★ NEW: 同步更新多图字段（保持顺序）
+        if (newProject.getScreenshotUrls() != null) {
+            existing.setScreenshotUrls(new ArrayList<>(newProject.getScreenshotUrls())); // 防御性拷贝
+        }
         return projectRepository.save(existing);
     }
 
