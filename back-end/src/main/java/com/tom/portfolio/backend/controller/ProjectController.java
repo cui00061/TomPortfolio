@@ -27,18 +27,16 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
-    public Project update(
-            @PathVariable Long id,                // ★ CHANGED: Long -> Integer（与你的实体 id:int 保持一致）
-            @RequestBody Project newProject) {
-        Project old = projectService.findById(id);   // ★ CHANGED: 方法签名要与 service 对齐（后面一起改）
+    public Project update(@PathVariable Long id, @RequestBody Project newProject) {
+        Project old = projectService.findById(id);
         old.setTitle(newProject.getTitle());
-        old.setDescription(newProject.getDescription());
-        old.setScreenshotUrls(newProject.getScreenshotUrls()); // ★ CHANGED: 更新多图列表
+        old.setDescription(newProject.getDescription());      // ★ List<String>
+        old.setScreenshotUrls(newProject.getScreenshotUrls());
         return projectService.saveProject(old);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {  // ★ CHANGED: Long -> Integer
-        projectService.deleteProjectById(id);       // ★ CHANGED: 方法签名与 service 对齐（后面一起改）
+    public void delete(@PathVariable Long id) {
+        projectService.deleteProjectById(id);
     }
 }

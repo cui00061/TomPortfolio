@@ -1,13 +1,42 @@
+<!--
+文件: ProjectCard.vue
+语言: Vue 3 单文件组件 (SFC, 使用 <script setup>)
+作用: 展示单个项目的卡片，支持折叠/展开、摘要显示、轮播图、详细描述
+服务对象: Projects.vue（项目列表页面）或任何需要项目卡片的页面
+说明:
+- props: project(必需, Object)、src(可选, String, 用作备用单图)
+- 收起时只显示摘要（前 1~2 条），避免卡片过高；展开后显示轮播图与完整描述
+- 折叠动画采用 max-height + padding 过渡（height:auto 无法平滑过渡）
+- 轮播图仅在「展开且图片数量>1」时自动播放；鼠标悬停暂停，移开恢复
+- 使用 Composition API（ref、computed、watch、生命周期）组织逻辑
+- 可访问性：使用 aria-hidden 与 sr-only 辅助屏幕阅读器
+-->
+
+<!--
+File: ProjectCard.vue
+Language: Vue 3 Single File Component (SFC, <script setup>)
+Purpose: Display a single project card with collapsible details, summary view, image carousel, and full description
+Used by: Projects.vue or any page that needs a project card
+Notes:
+- Props: project (required, Object), src (optional, String) used as fallback single image
+- When collapsed, shows a compact summary (first 1–2 items); when expanded, shows carousel and full details
+- Collapse/expand animation uses max-height + padding transition (height:auto cannot animate)
+- Carousel auto-plays only if panel is open and there are >1 images; paused on hover, resumed on mouse leave
+- Implements Vue Composition API (ref, computed, watch, lifecycle)
+- Accessibility: uses aria-hidden and sr-only for screen readers
+-->
+
 <template>
   <article
     class="bg-white/70 border border-nature-brown/10 rounded-2xl p-4 shadow-sm
            transition hover:shadow-lg"
   >
-    <!-- 标题 + 按钮 -->
     <header class="flex items-start justify-between gap-3">
       <h3 class="text-xl font-semibold text-nature-brown">
         {{ project.title }}
       </h3>
+
+      <!-- 文案随 open 变化，提高预期 / Label flips with `open` for better UX -->
       <button
         class="shrink-0 rounded-full border border-nature-brown/20 px-3 py-1 text-sm
                hover:bg-nature-brown hover:text-white transition"
@@ -17,43 +46,33 @@
       </button>
     </header>
 
-    <!-- 摘要（收起时显示 1~2 行） -->
+    <!-- 收起时的摘要 / Summary only when collapsed -->
     <p v-if="!open" class="mt-2 text-nature-brown/70 line-clamp-2">
-      {{ project.description }}
+      {{ summaryText }}
     </p>
 
-    <!-- 折叠内容：max-height + padding 过渡，丝滑展开 -->
-     <!-- [CHANGED] 绑定为布尔 -->
+    <!-- 展开内容容器：max-height + padding 做动画 / Expanded content with animated max-height -->
     <div
       ref="wrapRef"
       class="overflow-hidden transition-[max-height,padding] duration-500 ease-out"
       :style="{ maxHeight, paddingTop }"
-      :aria-hidden="!open"  
+      :aria-hidden="!open"
     >
-    
       <div ref="innerRef" class="pt-2">
-        <!-- 响应式：小屏上下，>=md 左右 -->
         <div class="grid gap-6 md:grid-cols-5 items-start">
-          <!-- 左侧图片区域：改为自动滚动轮播 -->
-           <!-- [ADDED] 悬停暂停 -->
-            <!-- [ADDED] 恢复播放 -->
-          <figure v-if="hasImages" class="md:col-span-2"> <!-- [CHANGED] -->
+          <!-- 左侧轮播（可选） / Optional left carousel -->
+          <figure v-if="hasImages" class="md:col-span-2">
             <div
               class="relative rounded-xl border border-nature-brown/10 overflow-hidden bg-white"
-              @mouseenter="pauseAuto"   
-              @mouseleave="resumeAuto"  
+              @mouseenter="pauseAuto"
+              @mouseleave="resumeAuto"
             >
-              <!-- 轮播视窗 -->
-               <!-- [CHANGED] 固定高，避免抖动 -->
-              <div
-                class="w-full h-52 md:h-[220px] overflow-hidden"  
-              >
-                <!-- 轮播轨道 -->
+              <div class="w-full h-52 md:h-[220px] overflow-hidden">
                 <div
                   class="flex h-full transition-transform duration-500 ease-out"
-                  :style="{ transform: `translateX(-${activeIndex * 100}%)` }"  
+                  :style="{ transform: `translateX(-${activeIndex * 100}%)` }"
                 >
-                  <!-- 每一页 -->
+                  <!-- 每张图占 100% 宽度 / Each slide is min-w-full -->
                   <div
                     v-for="(u, i) in srcList"
                     :key="i"
@@ -70,8 +89,7 @@
                 </div>
               </div>
 
-              <!-- 底部小圆点指示器 -->
-               <!-- [ADDED] 点击跳转 -->
+              <!-- 圆点导航 / Dots nav -->
               <div class="absolute bottom-2 inset-x-0 flex justify-center gap-1.5">
                 <button
                   v-for="(u, i) in srcList"
@@ -88,77 +106,100 @@
                 </button>
               </div>
 
-
-              <!-- 左右切换（可选） -->
+              <!-- 左右切换仅在多图时显示 / Prev/Next only if multiple images -->
               <button
                 v-if="srcList.length > 1"
-                class="absolute left-1 top-1/2 -translate-y-1/2 rounded-full bg-white/70 border border-nature-brown/20 px-2 py-1 text-xs hover:bg-white"
+                class="absolute left-1 top-1/2 -translate-y-1/2 rounded-full bg-white/70
+                       border border-nature-brown/20 px-2 py-1 text-xs hover:bg-white"
                 @click="prev"
                 aria-label="prev"
               >‹</button>
               <button
                 v-if="srcList.length > 1"
-                class="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-white/70 border border-nature-brown/20 px-2 py-1 text-xs hover:bg-white"
+                class="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-white/70
+                       border border-nature-brown/20 px-2 py-1 text-xs hover:bg-white"
                 @click="next"
                 aria-label="next"
               >›</button>
             </div>
           </figure>
 
-          <!-- 右侧文字（没有图片时占满整行） -->
-          <!-- 右侧文字（没有图片时占满整行） -->
-           <!-- [ADDED] 固定高度+滚动 -->
+          <!-- 右侧描述 / Right-side description -->
           <div
             :class="hasImages ? 'md:col-span-3' : 'md:col-span-5'"
             class="space-y-3"
-            :style="hasImages ? { maxHeight: '220px', overflowY: 'auto' } : {}"  
+            :style="hasImages ? { maxHeight: '220px', overflowY: 'auto' } : {}"
           >
-            <p class="text-nature-brown/85 leading-relaxed text-[17px] whitespace-pre-line">
-              {{ project.description }}
+            <!-- 优先列表渲染；兼容旧数据为字符串 -->
+            <ul
+              v-if="descList.length"
+              class="text-nature-brown/85 leading-relaxed text-[17px] space-y-2 list-disc pl-5"
+            >
+              <li v-for="(d, i) in descList" :key="i">{{ d }}</li>
+            </ul>
+            <p
+              v-else
+              class="text-nature-brown/85 leading-relaxed text-[17px] whitespace-pre-line"
+            >
+              {{ typeof project.description === 'string' ? project.description : '' }}
             </p>
           </div>
         </div>
       </div>
     </div>
-
   </article>
 </template>
 
 <script setup>
 import { ref, nextTick, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 
-// ✅ 解构 props，避免 "project is not defined"
+/* props：项目数据 + 备用单图 / Props: project data + fallback single image */
 const { project, src } = defineProps({
   project: { type: Object, required: true },
-  src: { type: String, default: '' }, // 兼容旧用法：单图地址
+  src: { type: String, default: '' },
 })
 
-// 折叠控制
+/* 
+  descList：把 description 规范成数组，便于统一渲染
+  - Array → trim + 过滤空项
+  - String → 按换行/分号/句号分割
+*/
+const descList = computed(() => {
+  const d = project?.description
+  if (Array.isArray(d)) return d.map(s => String(s).trim()).filter(Boolean)
+  if (typeof d === 'string') {
+    return d.split(/\r?\n|[;；]|(?<=\.)\s+/).map(s => s.trim()).filter(Boolean)
+  }
+  return []
+})
+
+/* 收起时的摘要（前 1~2 条），否则兼容旧字符串 */
+const summaryText = computed(() =>
+  descList.value.length
+    ? descList.value.slice(0, 2).join(' • ')
+    : (typeof project?.description === 'string' ? project.description : '')
+)
+
+/* 折叠/展开动画：maxHeight + paddingTop（height:auto 不能过渡） */
 const open = ref(false)
 const wrapRef = ref(null)
 const innerRef = ref(null)
 const maxHeight = ref('0px')
 const paddingTop = ref('0px')
+
 const measure = () => (innerRef.value ? innerRef.value.scrollHeight : 0)
 const expand = async () => {
   await nextTick()
   maxHeight.value = measure() + 'px'
   paddingTop.value = '8px'
 }
-const collapse = () => {
-  maxHeight.value = '0px'
-  paddingTop.value = '0px'
-}
-const toggle = async () => {
-  open.value = !open.value
-  open.value ? expand() : (stopAuto(), collapse())
-}
+const collapse = () => { maxHeight.value = '0px'; paddingTop.value = '0px' }
+const toggle = async () => { open.value = !open.value; open.value ? expand() : (stopAuto(), collapse()) }
 
-// 轮播图逻辑
+/* 轮播：多图时自动播放；悬停暂停、移出恢复 */
 const srcList = computed(() => {
   const arr = Array.isArray(project?.screenshotUrls) ? project.screenshotUrls : []
-  if (arr.length > 0) return arr
-  return src ? [src] : []
+  return arr.length > 0 ? arr : (src ? [src] : [])
 })
 const hasImages = computed(() => srcList.value.length > 0)
 
@@ -166,60 +207,28 @@ const activeIndex = ref(0)
 let timer = null
 const INTERVAL = 3000
 
-const next = () => {
-  if (srcList.value.length <= 1) return
-  activeIndex.value = (activeIndex.value + 1) % srcList.value.length
-}
-const prev = () => {
-  if (srcList.value.length <= 1) return
-  activeIndex.value = (activeIndex.value - 1 + srcList.value.length) % srcList.value.length
-}
-const go = (i) => {
-  if (i < 0 || i >= srcList.value.length) return
-  activeIndex.value = i
-}
+const next = () => { if (srcList.value.length > 1) activeIndex.value = (activeIndex.value + 1) % srcList.value.length }
+const prev = () => { if (srcList.value.length > 1) activeIndex.value = (activeIndex.value - 1 + srcList.value.length) % srcList.value.length }
+const go = (i) => { if (i >= 0 && i < srcList.value.length) activeIndex.value = i }
 
-const startAuto = () => {
-  if (timer || srcList.value.length <= 1) return
-  timer = setInterval(next, INTERVAL)
-}
-const stopAuto = () => {
-  if (timer) {
-    clearInterval(timer)
-    timer = null
-  }
-}
+const startAuto = () => { if (!timer && srcList.value.length > 1) timer = setInterval(next, INTERVAL) }
+const stopAuto = () => { if (timer) { clearInterval(timer); timer = null } }
 const pauseAuto = () => stopAuto()
-const resumeAuto = () => {
-  if (open.value) startAuto()
-}
+const resumeAuto = () => { if (open.value) startAuto() }
 
-watch(open, (v) => {
-  if (v) {
-    startAuto()
-    setTimeout(() => expand(), 0)
-  } else {
-    stopAuto()
-  }
-})
+/* open：展开→启动轮播并 expand；收起→停止轮播 */
+watch(open, (v) => { if (v) { startAuto(); setTimeout(() => expand(), 0) } else { stopAuto() } })
 
-watch(srcList, () => {
-  activeIndex.value = 0
-  if (open.value) {
-    stopAuto()
-    startAuto()
-  }
-})
+/* 图片列表变化：重置索引，如在展开中则重启轮播以避免越界/停表 */
+watch(srcList, () => { activeIndex.value = 0; if (open.value) { stopAuto(); startAuto() } })
 
-onMounted(() => {
-  if (open.value) startAuto()
-})
+/* 资源清理：避免泄漏 */
+onMounted(() => { if (open.value) startAuto() })
 onBeforeUnmount(() => stopAuto())
 </script>
 
-
 <style scoped>
-/* 2 行摘要（Tailwind v4 没内置 line-clamp，简易实现） */
+/* 两行截断（用于摘要） */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;

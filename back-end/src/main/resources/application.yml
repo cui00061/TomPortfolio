@@ -1,23 +1,37 @@
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/tomportfolio_db?useSSL=false&serverTimezone=UTC
+    # 数据库连接 URL：连接本地 MySQL 数据库 tomportfolio_db
+    # Database connection URL: connect to local MySQL DB "tomportfolio_db"
     username: root
+    # 数据库用户名 / Database username
     password: yA046861....  # ← 替换成你自己的 MySQL root 密码
+    # 数据库密码（需改成你本机 MySQL root 密码）
+    # Database password (replace with your own MySQL root password)
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # MySQL 驱动类 / MySQL JDBC driver class
 
   jpa:
     hibernate:
-      ddl-auto: update  # 每次启动时更新表结构（开发阶段推荐）
-    show-sql: true      # 控制台打印 SQL 语句（方便调试）
+      ddl-auto: update
+      # 每次启动时自动更新数据库表结构（开发阶段推荐，生产环境一般禁用）
+      # Update DB schema automatically on startup (recommended in dev, avoid in prod)
+    show-sql: true
+      # 控制台打印 SQL 语句（方便调试）
+    # Show SQL queries in console (useful for debugging)
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect  # 使用 MySQL 8 方言
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        # 指定使用 MySQL 8 方言
+        # Specify MySQL 8 dialect for Hibernate
 
-  # 可选配置：设置字符集编码（建议写）
+  # 可选配置：设置字符集编码
+  # Optional config: set SQL init encoding
   sql:
     init:
       encoding: UTF-8
 
 # 服务器端口（可选，默认是 8080）
+# Server port (optional, default is 8080)
 # server:
 #   port: 8080

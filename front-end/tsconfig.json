@@ -1,0 +1,59 @@
+{
+  // ===========================================================
+  // 文件：tsconfig.json
+  // 功能：TypeScript 编译器配置文件，控制编译行为和路径解析
+  // - 影响 Vite + Vue 项目的 TS 语法检查与类型提示
+  // - 配置 alias、编译目标、模块解析方式等
+  // Author: Tom
+  // ===========================================================
+  // File: tsconfig.json
+  // Purpose: TypeScript compiler configuration, controls how TS compiles
+  // - Affects TS type checking & IntelliSense in Vite + Vue projects
+  // - Defines alias, target, module resolution, etc.
+  // Author: Tom
+  // ===========================================================
+
+  "compilerOptions": {
+    // 目标 JS 版本：编译为 ES2020
+    // Target JS version: compile to ES2020
+    "target": "ES2020",
+
+    // 模块系统：使用 ESNext（支持动态 import 等特性）
+    // Module system: ESNext (supports dynamic import and modern syntax)
+    "module": "ESNext",
+
+    // 模块解析方式：Bundler（适配 Vite、Rollup、Webpack 等）
+    // Module resolution: Bundler (optimized for Vite, Rollup, Webpack)
+    "moduleResolution": "Bundler",
+
+    // 可用库：包含 ES2020 和 DOM API
+    // Libraries: includes ES2020 and DOM APIs
+    "lib": ["ES2020", "DOM"],
+
+    // 启用严格模式：更严格的类型检查
+    // Enable strict mode: stricter type checking
+    "strict": true,
+
+    // 跳过库文件的类型检查，加快编译速度
+    // Skip type checking of libraries: speeds up compilation
+    "skipLibCheck": true,
+
+    // 项目根路径：以当前目录为基础
+    // Base URL: relative to project root
+    "baseUrl": ".",
+
+    // 路径别名：@ 指向 src
+    // Path alias: @ points to src directory
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    // 额外类型声明：引入 Vite 提供的类型
+    // Extra type declarations: include Vite client types
+    "types": ["vite/client"]
+  },
+
+  // 需要编译的文件范围：包含 src 下的所有文件
+  // Files to include: all files under src directory
+  "include": ["src/**/*"]
+}

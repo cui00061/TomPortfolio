@@ -1,5 +1,6 @@
 package com.tom.portfolio.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -7,6 +8,7 @@ import java.util.List;
 
 @Entity
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class About {
 
     @Id
