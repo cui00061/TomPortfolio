@@ -6,7 +6,7 @@ import com.tom.portfolio.backend.service.AboutService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/about")
+@RequestMapping("api/about")
 public class AboutController {
 
     private final AboutService aboutService;

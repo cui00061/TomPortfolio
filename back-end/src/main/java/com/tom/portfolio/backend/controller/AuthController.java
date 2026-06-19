@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,22 +51,29 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResp> login(@RequestBody @Valid LoginDTO dto) {
-        // 认证用户名和密码 / Authenticate username and password
-        Authentication auth = am.authenticate(
-                new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword())
-        );
+    public ResponseEntity<?> login(@RequestBody @Valid LoginDTO dto) {
+        try {
+            // ① 尝试认证用户名和密码
+            Authentication auth = am.authenticate(
+                    new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword())
+            );
 
-        // 查询用户信息 / Find user by username
-        AppUser u = repo.findByUsername(dto.getUsername()).orElseThrow();
+            // ② 查询用户信息
+            AppUser u = repo.findByUsername(dto.getUsername()).orElseThrow();
 
-        // 生成 JWT，包含角色信息 / Generate JWT with role info
-        String token = jwt.generate(u.getUsername(), Map.of("role", u.getRole()));
+            // ③ 生成 JWT，包含角色信息
+            String token = jwt.generate(u.getUsername(), Map.of("role", u.getRole()));
 
-        // 设置过期时间，与 JwtService 配置保持一致 / Set expiration time, aligned with JwtService TTL
-        long exp = System.currentTimeMillis() + 3600_000;
+            // ④ 设置过期时间（单位：毫秒）
+            long exp = System.currentTimeMillis() + 3600_000;
 
-        // 返回登录响应（令牌 + 用户信息）/ Return login response (token + user info)
-        return ResponseEntity.ok(new LoginResp(token, u.getUsername(), u.getRole(), exp));
+            // ⑤ 构建响应返回
+            return ResponseEntity.ok(new LoginResp(token, u.getUsername(), u.getRole(), exp));
+
+        } catch (AuthenticationException e) {
+            // ⑥ 登录失败，返回 401 Unauthorized
+            return ResponseEntity.status(401).body("用户名或密码错误 / Invalid username or password");
+        }
     }
+
 }

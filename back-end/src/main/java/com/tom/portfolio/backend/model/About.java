@@ -25,11 +25,12 @@ public class About {
     /*如果是自定义实体数据结构，可以使用 “@OneToMany"来做注解,比如
         @OneToMany(mappedBy = "about", cascade = CascadeType.ALL)
         private List<Education> educations;*/
-    @ElementCollection
+
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> skills;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> educations;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> languages;
 
     /*

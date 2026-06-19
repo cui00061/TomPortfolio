@@ -36,11 +36,15 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // 允许所有路径 / Allow all request paths
-                        .allowedOrigins("http://localhost:5173") // 允许本地前端 / Allow local frontend
-                        .allowedMethods("*") // 允许所有请求方法 / Allow all HTTP methods
-                        .allowedHeaders("*") // 允许所有请求头 / Allow all request headers
-                        .allowCredentials(true); // 允许携带 cookie / Allow cookies if needed
+                registry.addMapping("/**")
+                        .allowedOrigins(
+                                "http://localhost:5173",                 // 开发
+                                "https://tomcui.com",               // 你的域名（买到后替换）
+                                "https://tomcui.com"
+                        )
+                        .allowedMethods("*")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }

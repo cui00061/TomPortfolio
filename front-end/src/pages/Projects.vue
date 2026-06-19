@@ -50,7 +50,7 @@ Purpose: Public "My Works" page
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import http from '@/lib/http'
 import ProjectCard from '@/components/ProjectCard.vue'
 
 /* 项目列表状态 / Reactive project list */
@@ -90,7 +90,7 @@ const normalizeProject = (p) => {
 /* 页面挂载时拉取数据 / Fetch data on mount */
 onMounted(async () => {
   try {
-    const res = await axios.get('http://localhost:8080/api/projects')
+    const res = await http.get('/projects')
     projects.value = Array.isArray(res.data) ? res.data.map(normalizeProject) : []
   } catch (err) {
     console.error('Failed to fetch projects info:', err)

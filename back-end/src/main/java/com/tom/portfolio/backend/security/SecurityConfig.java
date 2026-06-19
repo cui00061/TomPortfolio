@@ -85,31 +85,29 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) // 启用 CORS / Enable CORS
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 使用无状态会话 / Stateless session (JWT)
                 .authorizeHttpRequests(auth -> auth
-                        // 预检请求 / Preflight requests
+                        // 放行预检与 HEAD（很多代理/监控会发 HEAD）
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/**").permitAll()
 
-                        // ✅ 联系表单匿名提交放行 / Allow anonymous contact form submission
+                        // 健康检查 / 静态
+                        .requestMatchers("/actuator/health", "/", "/index.html", "/assets/**", "/favicon.ico").permitAll()
+
+                        // 公开读接口（GET）
+                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+
+                        // 匿名提交（例：联系表单）
                         .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
-
-                        // 公开读取接口 / Public GET endpoints
-                        .requestMatchers(HttpMethod.GET,
-                                "/api/projects/**", "/api/contact/**", "/api/about/**").permitAll()
-
-                        // 登录接口放行 / Allow login endpoint
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        // 其它写操作需要 ADMIN
+                        .requestMatchers(HttpMethod.POST,   "/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,  "/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
 
-                        // 其它写操作需要管理员角色 / Other write operations require ADMIN role
-                        .requestMatchers("/api/projects/**", "/api/contact/**", "/api/about/**").hasRole("ADMIN")
-
-                        // About 模块特殊规则 / Special rules for About module
-                        .requestMatchers(HttpMethod.GET, "/api/about").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/about").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/about").hasRole("ADMIN")
-
-                        // 其它请求默认允许（可按需收紧）
-                        // All other requests are allowed (can be restricted as needed)
+                        // 其余按需
                         .anyRequest().permitAll()
                 )
+
                 // 在 BasicAuthenticationFilter 之前加入 JWT 过滤器
                 // Add JWT filter before BasicAuthenticationFilter
                 .addFilterBefore(jwt, BasicAuthenticationFilter.class);

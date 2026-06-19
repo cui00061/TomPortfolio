@@ -89,7 +89,7 @@ Purpose: Public "Contact" page
 
 <script setup>
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import http from '@/lib/http'
 
 /* 表单与控件引用 / Refs to form and inputs */
 const formEl = ref(null)
@@ -127,7 +127,7 @@ const handleSubmit = async () => {
   }
 
   try {
-    await axios.post('http://localhost:8080/api/contact', form.value)
+    await http.post('/contact', form.value)
     submitted.value = true
     error.value = false
     form.value = { name: '', email: '', message: '' } // 清空表单 / reset form

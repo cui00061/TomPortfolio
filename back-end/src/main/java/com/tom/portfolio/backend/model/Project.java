@@ -16,6 +16,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.FetchType;
 
 @Entity
 @Data
@@ -26,18 +27,18 @@ public class Project {
 
     private String title;
 
-    // ★ CHANGED: description 改为多值列表，使用从表持久化（带顺序）
-    @ElementCollection
+    // 项目描述（EAGER 保证直接取出）
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
-            name = "project_descriptions",                    // 从表名
-            joinColumns = @JoinColumn(name = "project_id")    // 外键
+            name = "project_descriptions",
+            joinColumns = @JoinColumn(name = "project_id")
     )
-    @Column(name = "text", columnDefinition = "TEXT")     // 每条描述用 TEXT，避免长度限制
-    @OrderColumn(name = "sort_index")                     // 保留前端传入顺序
+    @Column(name = "text", columnDefinition = "TEXT")
+    @OrderColumn(name = "sort_index")
     private List<String> description = new ArrayList<>();
 
-    // ★ 已在你项目中：截图多值
-    @ElementCollection
+    // 项目截图（EAGER 保证直接取出）
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "project_screenshots",
             joinColumns = @JoinColumn(name = "project_id")

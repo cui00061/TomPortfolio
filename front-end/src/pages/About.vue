@@ -98,7 +98,7 @@ Purpose: Frontend "About Me" page
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import axios from 'axios'
+import http from '@/lib/http'
 
 /* 响应式对象：后端返回的 About 数据
    Reactive state: About data from backend */
@@ -113,7 +113,7 @@ const photoSrc = computed(() => about.value?.photo || defaultAvatar)
 /* 生命周期：挂载时拉取数据 / Lifecycle: fetch on mount */
 onMounted(async () => {
   try {
-    const res = await axios.get('http://localhost:8080/api/about')
+    const res = await http.get('/about')
     about.value = res.data
   } catch (err) {
     console.error('Failed to fetch about info:', err)
